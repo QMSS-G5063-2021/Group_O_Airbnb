@@ -1,0 +1,234 @@
+---
+title: "Data Visualisation Project Part 1"
+author: "Lavanya N"
+date: "4/18/2021"
+output: html_document
+---
+
+```{r, echo=FALSE}
+library(tidyverse)
+library(lubridate)
+library(stringr)
+source('https://raw.githubusercontent.com/iascchen/VisHealth/master/R/calendarHeat.R')
+```
+
+# 1. Visualising AirBnB Occupancies and Revenue Generated Over Time
+
+Calendar heatmaps are often used to discern patterns, trends, and anomalies over time in a calendar-like interface. In this case, they can be used to understand how AirBnB occupancies and revenue generated over change over the period of 2019 to 2020.
+
+```{r, echo=FALSE}
+first2019 <- read.csv('Calendar Data/first2019.csv')
+second2019 <- read.csv('Calendar Data/second2019.csv')
+combined2019 <- rbind(first2019, second2019)
+combined2019 <- combined2019 %>% mutate(booked = ifelse(available == 'f', 1, 0))
+combined2019$price <- as.integer(str_replace(combined2019$price, '.', ''))
+
+occupancy_2019 <- combined2019 %>% group_by(date = date) %>% 
+  summarise(totalBooked = sum(booked, na.rm = TRUE), totalListings = n()) %>% 
+  mutate(percent_booked = (totalBooked/totalListings)*100)
+
+revenue_2019 <- combined2019 %>% filter(booked == 1) %>% group_by(date = date) %>%
+  summarise(totalRevenue = sum(price, na.rm = TRUE), 
+            avgRevenue = mean(price, na.rm = TRUE))
+```
+
+```{r, echo=FALSE}
+first2020 <- read.csv('Calendar Data/first2020.csv')
+second2020 <- read.csv('Calendar Data/second2020.csv')
+combined2020 <- rbind(first2020, second2020)
+combined2020 <- combined2020 %>% mutate(booked = ifelse(available == 'f', 1, 0))
+combined2020$price <- as.integer(str_replace(combined2020$price, '.', ''))
+
+occupancy_2020 <- combined2020 %>% group_by(date = date) %>% 
+  summarise(totalBooked = sum(booked, na.rm = TRUE), totalListings = n()) %>% 
+  mutate(percent_booked = (totalBooked/totalListings)*100)
+
+revenue_2020 <- combined2020 %>% filter(booked == 1) %>% group_by(date = date) %>%
+  summarise(totalRevenue = sum(price, na.rm = TRUE), 
+            avgRevenue = mean(price, na.rm = TRUE))
+```
+
+# a. Total Occupancies in 2019 and 2020
+
+We can see that total occupancies in 2019 were generally at least twice that of occupancies in 2020.
+
+```{r, echo=FALSE}
+combined_occupancy <- rbind(occupancy_2019, occupancy_2020)
+```
+
+```{r,echo=FALSE}
+calendarHeat(combined_occupancy$date, combined_occupancy$totalBooked, 
+             ncolors = 99, color = 'g2r', varname = 'Total Occupancies in New York City')
+```
+
+# b. Occupancy Rates in 2019 and 2020
+
+Occupancy rates are severely reduced in 2020.
+
+```{r, echo=FALSE}
+calendarHeat(combined_occupancy$date, combined_occupancy$percent_booked, 
+             ncolors = 99, color = 'g2r', varname = 'Occupancy Rates in New York City')
+```
+
+# c. Total Daily Revenue in 2019 and 2020
+
+Total daily revenue decreased from about 6 million dollars a day to 2 or 3 million dollars a day.
+
+```{r, echo=FALSE}
+combined_revenue <- rbind(revenue_2019, revenue_2020)
+```
+
+```{r, echo=FALSE}
+calendarHeat(combined_revenue$date, combined_revenue$totalRevenue, 
+             ncolors = 99, color = 'r2b', varname = 'Total Daily Revenue in New York City')
+```
+
+# d. Average Daily Revenue in 2019 and 2020
+
+Average daily revenues are also lower in 2020.
+
+```{r, echo=FALSE}
+calendarHeat(combined_revenue$date, combined_revenue$avgRevenue, 
+             ncolors = 99, color = 'r2b', varname = 'Average Daily Revenues in New York City')
+```
+
+# 2. Seasonal Changes in AirBnB Occupancy and Revenue Generated
+
+We can view the same patterns using line graphs instead.
+
+```{r, echo=FALSE}
+ggplot(data = combined_occupancy, aes(x = as.Date(date), y = totalBooked)) +
+  geom_point(color = '#007A87', alpha = 0.5) +
+  geom_smooth(color = '#FF5A5F') +
+  scale_x_date(date_labels = '%b %y') +
+  labs(title = 'Total Occupancies in New York City') +
+  ylab('Total Bookings') +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = 'none',
+        axis.title.x = element_blank())
+```
+
+```{r, echo=FALSE}
+ggplot(data = combined_occupancy, aes(x = as.Date(date), y = percent_booked)) +
+  geom_point(color = '#007A87', alpha = 0.5) +
+  geom_smooth(color = '#FF5A5F') +
+  scale_x_date(date_labels = '%b %y') +
+  labs(title = 'Occupancy Rates in New York City') +
+  ylab('Occupancy Rate (%)') +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = 'none',
+        axis.title.x = element_blank())
+```
+
+```{r, echo=FALSE}
+ggplot(data = combined_revenue, aes(x = as.Date(date), y = totalRevenue)) +
+  geom_point(color = '#007A87', alpha = 0.5) +
+  geom_smooth(color = '#FF5A5F') +
+  scale_x_date(date_labels = '%b %y') +
+  labs(title = 'Total Daily Revenue in New York City') +
+  ylab('Total Revenue ($)') +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = 'none',
+        axis.title.x = element_blank())
+```
+
+```{r, echo=FALSE}
+ggplot(data = combined_occupancy, aes(x = as.Date(date), y = totalBooked)) +
+  geom_point(color = '#007A87', alpha = 0.5) +
+  geom_smooth(color = '#FF5A5F') +
+  scale_x_date(date_labels = '%b %y') +
+  labs(title = 'Average Daily Revenue in New York City') +
+  ylab('Average Revenue ($)') +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = 'none',
+        axis.title.x = element_blank())
+```
+
+# 3. Data Tables on Occupancy and Revenue of AirBnBs in New York City
+
+The data tables allow users to see the number of bookings, listings, percentage of listings booked, total revenue, and average revenue for any day that they select.
+
+```{r, echo=FALSE}
+library(DT)
+```
+
+```{r, echo=FALSE}
+datatable(combined_occupancy, filter = 'top', options = list(searchHighlight = TRUE)) %>%
+  formatRound(~percent_booked, digits = 0)
+```
+
+```{r, echo=FALSE}
+datatable(combined_revenue, filter = 'top', options = list(searchHighlight = TRUE)) %>%
+  formatRound(~totalRevenue + avgRevenue, digits = 0)
+```
+
+# 4. Understanding Trends in AirBnB Reviews
+
+The patterns in the reviews are similar to those in the occupancy and revenue trends.
+
+```{r, echo=FALSE}
+reviews <- read.csv('Reviews Data/reviews.csv')
+reviews_summary <- reviews %>% group_by(date) %>% summarise(totalReviews = n())
+reviews_summary$percent_reviews <- reviews_summary$totalReviews/combined_occupancy$totalBooked
+```
+
+```{r, echo=FALSE}
+ggplot(data = reviews_summary, aes(x = as.Date(date), y = totalReviews)) +
+  geom_point(color = '#007A87', alpha = 0.5) +
+  geom_smooth(color = '#FF5A5F') +
+  scale_x_date(date_labels = '%b %y') +
+  labs(title = 'Total Daily Reviews in New York City') +
+  ylab('Total Reviews') +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = 'none',
+        axis.title.x = element_blank())
+```
+
+On average, we see that only 1.5% of guests leave reviews.
+
+```{r, echo=FALSE}
+ggplot(data = reviews_summary, aes(x = as.Date(date), y = percent_reviews)) +
+  geom_point(color = '#007A87', alpha = 0.5) +
+  geom_smooth(color = '#FF5A5F') +
+  scale_x_date(date_labels = '%b %y') +
+  labs(title = 'Percentage of Bookings Reviewed in New York City') +
+  ylab('Review Percentage (%)') +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = 'none',
+        axis.title.x = element_blank())
+```
+
+# 5. What Makes a Host a Superhost?
+
+We were interested to know what makes a host a superhost. We believe that response and acceptance rates could be linked closely to it.
+
+```{r, echo=FALSE}
+listings <- read.csv('Listings Data/jan2021_listings.csv')
+superhost <- listings %>% select(host_response_time, host_response_rate, host_acceptance_rate, host_has_profile_pic, host_identity_verified, host_is_superhost)
+superhost[superhost == 'N/A'] <- NA
+superhost <- na.omit(superhost)
+superhost$host_acceptance_rate <- as.integer(str_replace(superhost$host_acceptance_rate, '%', ''))
+superhost$host_response_rate <- as.integer(str_replace(superhost$host_response_rate, '%', ''))
+superhost_summary <- superhost %>% group_by(host_is_superhost) %>% summarise(avgResponse = mean(host_response_rate, na.rm = TRUE), avgAcceptance = mean(host_acceptance_rate, na.rm = TRUE), hostPic = sum(host_has_profile_pic == 't'), hostIdentity = sum(host_identity_verified == 't'))
+superhost_summary <- superhost_summary[2:3, ]
+```
+
+```{r}
+ggplot(data = superhost_summary, aes(x = host_is_superhost, y = avgResponse, fill = host_is_superhost)) +
+  geom_col(width = 0.5) +
+  labs(title = 'Average Response Rates of Superhosts and Non-Superhosts') +
+  ylab('Response Rates (%)') +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = 'none',
+        axis.title.x = element_blank())
+```
+
+```{r, echo=FALSE}
+ggplot(data = superhost_summary, aes(x = host_is_superhost, y = avgAcceptance, fill = host_is_superhost)) +
+  geom_col(width = 0.5) +
+  labs(title = 'Average Acceptance Rates of Superhosts and Non-Superhosts') +
+  ylab('Acceptance Rates (%)') +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = 'none',
+        axis.title.x = element_blank())
+```
