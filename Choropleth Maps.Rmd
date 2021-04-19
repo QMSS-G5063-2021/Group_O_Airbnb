@@ -1,0 +1,194 @@
+---
+title: "minimum"
+author: "Kyeong Je Kim"
+date: "4/19/2021"
+output: html_document
+---
+
+
+```{r}
+getwd()
+setwd("/Users/kyeongjekim/Documents/GitHub/Study_2")
+```
+
+```{r}
+library(ggplot2)
+library(devtools)
+library(leaflet)
+library(plotly)
+library(highcharter)
+library(sf)
+library(raster)
+library(dplyr)
+library(spData)
+library(tmap)
+library(cartogram)
+library(RColorBrewer)
+library(tigris)
+library(sp)
+library(ggmap)
+library(maptools)
+library(broom)
+library(httr)
+library(rgdal)
+library(mapcan)
+library(highcharter)
+library(DT)
+library(htmlwidgets)
+```
+
+
+```{r}
+# Data Source: http://insideairbnb.com/get-the-data.html
+# Please feel free to look around the website if you want to add more cities. 
+# import datset and check head
+gs19 <- read.csv("/Users/kyeongjekim/Desktop/Columbia S2021/Data_Visualization/tP/gs19.csv")
+df20 <- read.csv("/Users/kyeongjekim/Desktop/Columbia S2021/Data_Visualization/tP/total_20.csv")
+```
+
+```{r}
+#gs19 <- df19 %>%
+#  select(id, scrape_id, last_scraped, name, description, host_since, host_location, host_neighbourhood, neighbourhood, neighbourhood_cleansed, neighbourhood_group_cleansed, latitude, latitude, longitude, property_type, room_type, accommodates, bathrooms, bedrooms, beds, amenities, price, minimum_nights, maximum_nights, last_review, review_scores_rating, review_scores_accuracy, review_scores_communication, review_scores_location, review_scores_value, reviews_per_month)
+#write.csv(gs19, "gs19.csv")
+gs20 <- df20
+```
+
+```{r}
+pal <- colorFactor(c("navy", "red", "gold", "green"), domain = c("Entire home/apt", "Private room", "Hotel room", "Shared room"))
+```
+
+```{r}
+
+g1 <- gs19 %>%
+  select(latitude, longitude, room_type, property_type, neighbourhood_group_cleansed, price)
+```
+
+
+```{r}
+g2 <- gs20 %>%
+  select(latitude, longitude, room_type, property_type, neighbourhood_group_cleansed, price)
+```
+
+
+```{r}
+
+r <- GET('http://data.beta.nyc//dataset/0ff93d2d-90ba-457c-9f7e-39e47bf2ac5f/resource/35dd04fb-81b3-479b-a074-a27a37888ce7/download/d085e2f8d0b54d4590b1e7d1f35594c1pediacitiesnycneighborhoods.geojson')
+nyc_neighborhoods <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
+nyc_neighborhoods_df <- tidy(nyc_neighborhoods)
+```
+
+
+```{r}
+set.seed(2021)
+lats <- g1$latitude
+lngs <- g1$longitude
+points <- data.frame(lat=lats, lng=lngs)
+
+points_spdf <- points
+coordinates(points_spdf) <- ~lng + lat
+proj4string(points_spdf) <- proj4string(nyc_neighborhoods)
+matches <- over(points_spdf, nyc_neighborhoods)
+points <- cbind(points, matches)
+
+points_by_neighborhood <- points %>%
+  group_by(neighborhood) %>%
+  summarize(num_airbnb=n())
+
+```
+
+
+```{r}
+map_data <- geo_join(nyc_neighborhoods, points_by_neighborhood, "neighborhood", "neighborhood")
+
+pal <- colorNumeric(palette = "RdBu",
+                    domain = range(map_data@data$num_airbnb, na.rm=T))
+```
+
+
+```{r}
+plot_data <- tidy(nyc_neighborhoods, region="neighborhood") %>%
+  left_join(., points_by_neighborhood, by=c("id"="neighborhood")) %>%
+  filter(!is.na(num_airbnb))
+
+```
+
+
+```{r}
+library(ggmap)
+manhattan_map <- get_map(location = c(lon = -74.00, lat = 40.77), maptype = "terrain", zoom = 10)
+```
+
+```{r}
+
+num_airbnb <- ggmap(manhattan_map) + 
+  geom_polygon(data=plot_data, aes(x=long, y=lat, group=group, fill=num_airbnb), alpha=0.75) + 
+  labs(
+    title = "Number of Airbnb by borough in NYC in 2019"
+  )
+
+```
+
+
+```{r}
+plotly_num_airbnb19 <- plotly::ggplotly(num_airbnb)
+plotly_num_airbnb19
+```
+
+
+```{r}
+set.seed(2022)
+lats2 <- g2$latitude
+lngs2 <- g2$longitude
+points2 <- data.frame(lat=lats2, lng=lngs2)
+
+
+points_spdf2 <- points2
+coordinates(points_spdf2) <- ~lng + lat
+proj4string(points_spdf2) <- proj4string(nyc_neighborhoods)
+matches2 <- over(points_spdf2, nyc_neighborhoods)
+points2 <- cbind(points2, matches2)
+
+
+points_by_neighborhood2 <- points2 %>%
+  group_by(neighborhood) %>%
+  summarize(num_airbnb=n())
+
+```
+
+
+```{r}
+map_data2 <- geo_join(nyc_neighborhoods, points_by_neighborhood2, "neighborhood", "neighborhood")
+
+pal <- colorNumeric(palette = "RdBu",
+                    domain = range(map_data2@data$num_airbnb, na.rm=T))
+```
+
+
+
+```{r}
+plot_data2 <- tidy(nyc_neighborhoods, region="neighborhood") %>%
+  left_join(., points_by_neighborhood2, by=c("id"="neighborhood")) %>%
+  filter(!is.na(num_airbnb))
+
+```
+
+
+```{r}
+library(ggmap)
+manhattan_map <- get_map(location = c(lon = -74.00, lat = 40.77), maptype = "terrain", zoom = 10)
+```
+
+```{r}
+
+num_airbnb20 <- ggmap(manhattan_map) + 
+  geom_polygon(data=plot_data2, aes(x=long, y=lat, group=group, fill=num_airbnb), alpha=0.75) + 
+  labs(
+    title = "Number of Airbnb by borough in NYC in 2020"
+  )
+
+```
+
+```{r}
+plotly_num_airbnb20 <- plotly::ggplotly(num_airbnb20)
+plotly_num_airbnb20
+```
