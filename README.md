@@ -15,4 +15,4 @@
 >http://insideairbnb.com/get-the-data.html
 
 ###
-Skills: ggplot2, Geospatial, Plotly, ggmap, WordCloud, and some other visualization functions in R.
+***Skills: ggplot2, Geospatial, Plotly, ggmap, WordCloud, and some other visualization functions in R.
