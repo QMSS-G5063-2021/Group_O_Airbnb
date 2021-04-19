@@ -2,7 +2,7 @@
 > This is the public repository for Group O.  
 
 # TOPIC
-> Airbnb New York City.
+> Airbnb New York City (Five Boroughs: The Bronx, Brooklyn, Manhattan, Queens, and Staten Island)
 
 ## Group Member
 - Armaan Ahmed (asa2249@columbia.edu)
