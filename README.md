@@ -10,6 +10,9 @@
 - Sukyung Kim (sk4804@columbia.edu)
 - Kyeong Je Kim (kk3466@columbia.edu)
 
+### Group Presentation Video
+>https://drive.google.com/file/d/1A5ojnlKYo1tzIuSlcMzM7TNo7O8y6Fr8/view?usp=sharing.
+
 
 ### Data Source:
 >http://insideairbnb.com/get-the-data.html
