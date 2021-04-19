@@ -1,0 +1,647 @@
+---
+title: "Group O Final Project"
+author: "Armaan, Lavanya, Su, KJ"
+date: "4/19/2021"
+output: html_document
+---
+
+
+```{r setup, include=FALSE, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, echo=FALSE}
+library(tidyverse)
+library(lubridate)
+library(stringr)
+source('https://raw.githubusercontent.com/iascchen/VisHealth/master/R/calendarHeat.R')
+```
+
+# 1. Visualising AirBnB Occupancies and Revenue Generated Over Time
+
+Calendar heatmaps are often used to discern patterns, trends, and anomalies over time in a calendar-like interface. In this case, they can be used to understand how AirBnB occupancies and revenue generated over change over the period of 2019 to 2020.
+
+```{r, echo=FALSE}
+first2019 <- read.csv('/Users/armaanahmed/Desktop/Data\ Viz\ AirBNB\ Data/Lavanya/first2019.csv')
+second2019 <- read.csv('/Users/armaanahmed/Desktop/Data\ Viz\ AirBNB\ Data/Lavanya/second2019.csv')
+combined2019 <- rbind(first2019, second2019)
+combined2019 <- combined2019 %>% mutate(booked = ifelse(available == 'f', 1, 0))
+combined2019$price <- as.integer(str_replace(combined2019$price, '.', ''))
+
+occupancy_2019 <- combined2019 %>% group_by(date = date) %>% 
+  summarise(totalBooked = sum(booked, na.rm = TRUE), totalListings = n()) %>% 
+  mutate(percent_booked = (totalBooked/totalListings)*100)
+
+revenue_2019 <- combined2019 %>% filter(booked == 1) %>% group_by(date = date) %>%
+  summarise(totalRevenue = sum(price, na.rm = TRUE), 
+            avgRevenue = mean(price, na.rm = TRUE))
+```
+
+```{r, echo=FALSE}
+first2020 <- read.csv('/Users/armaanahmed/Desktop/Data\ Viz\ AirBNB\ Data/Lavanya/first2020.csv')
+second2020 <- read.csv('/Users/armaanahmed/Desktop/Data\ Viz\ AirBNB\ Data/Lavanya/second2020.csv')
+combined2020 <- rbind(first2020, second2020)
+combined2020 <- combined2020 %>% mutate(booked = ifelse(available == 'f', 1, 0))
+combined2020$price <- as.integer(str_replace(combined2020$price, '.', ''))
+
+occupancy_2020 <- combined2020 %>% group_by(date = date) %>% 
+  summarise(totalBooked = sum(booked, na.rm = TRUE), totalListings = n()) %>% 
+  mutate(percent_booked = (totalBooked/totalListings)*100)
+
+revenue_2020 <- combined2020 %>% filter(booked == 1) %>% group_by(date = date) %>%
+  summarise(totalRevenue = sum(price, na.rm = TRUE), 
+            avgRevenue = mean(price, na.rm = TRUE))
+```
+
+# a. Total Occupancies in 2019 and 2020
+
+We can see that total occupancies in 2019 were generally at least twice that of occupancies in 2020.
+
+```{r, echo=FALSE}
+combined_occupancy <- rbind(occupancy_2019, occupancy_2020)
+```
+
+```{r,echo=FALSE}
+calendarHeat(combined_occupancy$date, combined_occupancy$totalBooked, 
+             ncolors = 99, color = 'g2r', varname = 'Total Occupancies in New York City')
+```
+
+# b. Occupancy Rates in 2019 and 2020
+
+Occupancy rates are severely reduced in 2020.
+
+```{r, echo=FALSE}
+calendarHeat(combined_occupancy$date, combined_occupancy$percent_booked, 
+             ncolors = 99, color = 'g2r', varname = 'Occupancy Rates in New York City')
+```
+
+# c. Total Daily Revenue in 2019 and 2020
+
+Total daily revenue decreased from about 6 million dollars a day to 2 or 3 million dollars a day.
+
+```{r, echo=FALSE}
+combined_revenue <- rbind(revenue_2019, revenue_2020)
+```
+
+```{r, echo=FALSE}
+calendarHeat(combined_revenue$date, combined_revenue$totalRevenue, 
+             ncolors = 99, color = 'r2b', varname = 'Total Daily Revenue in New York City')
+```
+
+# d. Average Daily Revenue in 2019 and 2020
+
+Average daily revenues are also lower in 2020.
+
+```{r, echo=FALSE}
+calendarHeat(combined_revenue$date, combined_revenue$avgRevenue, 
+             ncolors = 99, color = 'r2b', varname = 'Average Daily Revenues in New York City')
+```
+
+# 2. Seasonal Changes in AirBnB Occupancy and Revenue Generated
+
+We can view the same patterns using line graphs instead.
+
+```{r, echo=FALSE}
+ggplot(data = combined_occupancy, aes(x = as.Date(date), y = totalBooked)) +
+  geom_point(color = '#007A87', alpha = 0.5) +
+  geom_smooth(color = '#FF5A5F') +
+  scale_x_date(date_labels = '%b %y') +
+  labs(title = 'Total Occupancies in New York City') +
+  ylab('Total Bookings') +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = 'none',
+        axis.title.x = element_blank())
+```
+
+```{r, echo=FALSE}
+ggplot(data = combined_occupancy, aes(x = as.Date(date), y = percent_booked)) +
+  geom_point(color = '#007A87', alpha = 0.5) +
+  geom_smooth(color = '#FF5A5F') +
+  scale_x_date(date_labels = '%b %y') +
+  labs(title = 'Occupancy Rates in New York City') +
+  ylab('Occupancy Rate (%)') +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = 'none',
+        axis.title.x = element_blank())
+```
+
+```{r, echo=FALSE}
+ggplot(data = combined_revenue, aes(x = as.Date(date), y = totalRevenue)) +
+  geom_point(color = '#007A87', alpha = 0.5) +
+  geom_smooth(color = '#FF5A5F') +
+  scale_x_date(date_labels = '%b %y') +
+  labs(title = 'Total Daily Revenue in New York City') +
+  ylab('Total Revenue ($)') +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = 'none',
+        axis.title.x = element_blank())
+```
+
+```{r, echo=FALSE}
+ggplot(data = combined_occupancy, aes(x = as.Date(date), y = totalBooked)) +
+  geom_point(color = '#007A87', alpha = 0.5) +
+  geom_smooth(color = '#FF5A5F') +
+  scale_x_date(date_labels = '%b %y') +
+  labs(title = 'Average Daily Revenue in New York City') +
+  ylab('Average Revenue ($)') +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = 'none',
+        axis.title.x = element_blank())
+```
+
+# 3. Data Tables on Occupancy and Revenue of AirBnBs in New York City
+
+The data tables allow users to see the number of bookings, listings, percentage of listings booked, total revenue, and average revenue for any day that they select.
+
+```{r, echo=FALSE}
+library(DT)
+```
+
+```{r, echo=FALSE}
+datatable(combined_occupancy, filter = 'top', options = list(searchHighlight = TRUE)) %>%
+  formatRound(~percent_booked, digits = 0)
+```
+
+```{r, echo=FALSE}
+datatable(combined_revenue, filter = 'top', options = list(searchHighlight = TRUE)) %>%
+  formatRound(~totalRevenue + avgRevenue, digits = 0)
+```
+
+# 4. Understanding Trends in AirBnB Reviews
+
+The patterns in the reviews are similar to those in the occupancy and revenue trends.
+
+```{r, echo=FALSE}
+reviews <- read.csv('/Users/armaanahmed/Desktop/Data\ Viz\ AirBNB\ Data/Lavanya/reviews.csv')
+reviews_summary <- reviews %>% group_by(date) %>% summarise(totalReviews = n())
+reviews_summary$percent_reviews <- reviews_summary$totalReviews/combined_occupancy$totalBooked
+```
+
+```{r, echo=FALSE}
+ggplot(data = reviews_summary, aes(x = as.Date(date), y = totalReviews)) +
+  geom_point(color = '#007A87', alpha = 0.5) +
+  geom_smooth(color = '#FF5A5F') +
+  scale_x_date(date_labels = '%b %y') +
+  labs(title = 'Total Daily Reviews in New York City') +
+  ylab('Total Reviews') +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = 'none',
+        axis.title.x = element_blank())
+```
+
+On average, we see that only 1.5% of guests leave reviews.
+
+```{r, echo=FALSE}
+ggplot(data = reviews_summary, aes(x = as.Date(date), y = percent_reviews)) +
+  geom_point(color = '#007A87', alpha = 0.5) +
+  geom_smooth(color = '#FF5A5F') +
+  scale_x_date(date_labels = '%b %y') +
+  labs(title = 'Percentage of Bookings Reviewed in New York City') +
+  ylab('Review Percentage (%)') +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = 'none',
+        axis.title.x = element_blank())
+```
+
+# 5. What Makes a Host a Superhost?
+
+We were interested to know what makes a host a superhost. We believe that response and acceptance rates could be linked closely to it.
+
+```{r, echo=FALSE}
+listings <- read.csv('/Users/armaanahmed/Desktop/Data\ Viz\ AirBNB\ Data/Lavanya/jan2021_listings.csv')
+superhost <- listings %>% select(host_response_time, host_response_rate, host_acceptance_rate, host_has_profile_pic, host_identity_verified, host_is_superhost)
+superhost[superhost == 'N/A'] <- NA
+superhost <- na.omit(superhost)
+superhost$host_acceptance_rate <- as.integer(str_replace(superhost$host_acceptance_rate, '%', ''))
+superhost$host_response_rate <- as.integer(str_replace(superhost$host_response_rate, '%', ''))
+superhost_summary <- superhost %>% group_by(host_is_superhost) %>% summarise(avgResponse = mean(host_response_rate, na.rm = TRUE), avgAcceptance = mean(host_acceptance_rate, na.rm = TRUE), hostPic = sum(host_has_profile_pic == 't'), hostIdentity = sum(host_identity_verified == 't'))
+superhost_summary <- superhost_summary[2:3, ]
+```
+
+```{r}
+ggplot(data = superhost_summary, aes(x = host_is_superhost, y = avgResponse, fill = host_is_superhost)) +
+  geom_col(width = 0.5) +
+  labs(title = 'Average Response Rates of Superhosts and Non-Superhosts') +
+  ylab('Response Rates (%)') +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = 'none',
+        axis.title.x = element_blank())
+```
+
+```{r, echo=FALSE}
+ggplot(data = superhost_summary, aes(x = host_is_superhost, y = avgAcceptance, fill = host_is_superhost)) +
+  geom_col(width = 0.5) +
+  labs(title = 'Average Acceptance Rates of Superhosts and Non-Superhosts') +
+  ylab('Acceptance Rates (%)') +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = 'none',
+        axis.title.x = element_blank())
+```
+
+# 6. Let's do some text analysis!!
+
+
+```{r, warning = FALSE}
+library(tidyverse)
+
+###/Users/armaanahmed/Desktop/listings.csv 
+##/Users/armaanahmed/Desktop/reviews.csv 
+##/Users/armaanahmed/Desktop/calendar.csv 
+##install.packages("textdata")
+
+reviews <- read.csv("/Users/armaanahmed/Desktop/Data\ Viz\ AirBNB\ Data/Su/data2/reviews.csv")
+listings <- read.csv("/Users/armaanahmed/Desktop/Data\ Viz\ AirBNB\ Data/Su/data2/listings.csv")
+airbnb <- inner_join(listings, reviews, by=c("id" = "listing_id"))
+
+## filter 2019-2020 data
+airbnb <- airbnb %>% filter(date > "2018-12-31" & date < "2021-01-01")
+```
+
+```{r}
+## How many properties does a host own?
+airbnb2 <- airbnb %>% group_by(host_id) %>%
+  count(id) %>%
+  arrange(desc(n)) %>%
+  group_by(host_id) %>%
+  count() %>% arrange(desc(n)) 
+
+table(airbnb2$n)
+
+
+```
+
+#### Cleaning and PreProcessing Text
+
+```{r, warning = FALSE}
+
+library(tm)
+library(quanteda)
+
+## remove non-english comments
+airbnb3 <- airbnb[which(!grepl("[^\x01-\x7F]+", airbnb$comments)),]
+
+
+## remove stop words
+airbnb3$comments <- removeWords(airbnb3$comments, stopwords(language = "en", source = "stopwords-iso"))
+airbnb3$comments <- removeWords(airbnb3$comments, stopwords(language = "en", source = "marimo"))
+
+## remove numbers, whitespace, punctuation
+airbnb3$comments <- removeNumbers(airbnb3$comments)
+airbnb3$comments <- stripWhitespace(airbnb3$comments)
+airbnb3$comments <- removePunctuation(airbnb3$comments)
+
+## tolower
+airbnb3$comments <- tolower(airbnb3$comments)
+
+```
+
+
+
+
+
+
+## Sentiment Analysis
+
+```{r, warning = FALSE}
+##install.packages("tidytext")
+library(tidytext)
+
+tidy_ab  <- unnest_tokens(airbnb3,  output = word, input = comments) %>%
+  anti_join(stop_words, by = "word")
+
+afinn <- get_sentiments("afinn")
+tidy_ab_sent <- inner_join(tidy_ab,  afinn, by = "word")
+
+sent_by_rev <- tidy_ab_sent %>%
+  group_by(host_id, reviewer_id) %>%
+  mutate(rev_sent = mean(value))
+
+```
+
+
+```{r, message = FALSE}
+
+
+summary(tidy_ab_sent$price) 
+## 75% of the properties are cheaper than $145 per night
+
+ 
+tidy_ab_sent <- tidy_ab_sent %>%
+  group_by(host_id, reviewer_id) %>%
+  mutate(rev_sent = mean(value))
+
+tidy_ab_sent$sentiment_fac <- cut(tidy_ab_sent$rev_sent, breaks = -5:5)
+table(tidy_ab_sent$sentiment_fac)
+
+
+
+```
+
+
+
+```{r}
+## divide review sentiments into two groups: good and bad
+tidy_ab_sent$sentiment <- ifelse(tidy_ab_sent$value > 0, "good", "bad")
+
+tidy_ab_sent %>%
+  filter(price < 200) %>%
+  group_by(host_id, reviewer_id) %>%
+  ggplot(aes(x=neighbourhood_group_cleansed, y=price, color=sentiment)) +
+  geom_boxplot() +
+  labs(title="Neighborhood groups and Price by sentiment",
+       x="Neighborhood Group", y="Price per night($)")
+
+tidy_ab_combined <- tidy_ab_sent %>%
+  group_by(word, sentiment) %>% 
+  summarise(count = n()) %>% arrange(desc(count))
+
+ab_dtm <- tidy_ab_combined %>% cast_dtm(sentiment, word, count)
+ab_dtm
+
+ab_m <- as.matrix(ab_dtm)
+ab_tm <- t(ab_m)
+```
+
+
+##### Good Comments Word Cloud
+
+What are the key words that are found in good comments?
+
+```{r}
+library(wordcloud)
+
+## success
+filter(tidy_ab_combined, sentiment=="good") %>%
+  with(wordcloud(word, count, max.words = 100, min.freq=3,scale=c(4,.5), 
+           random.order = FALSE, rot.per=.5,colors="blue"))
+```
+Words like Clean, nice, recommend all come up! It seems like cleanliness, aesthetics, and social cues (like recommend) are the most important aspect of a good review.
+
+##### Bad Comments Word Cloud
+
+What are the key words that are found in bad comments?
+
+```{r}
+
+## success
+filter(tidy_ab_combined, sentiment=="bad") %>%
+  with(wordcloud(word, count, max.words = 100, min.freq=3,scale=c(4,.5), 
+           random.order = FALSE, rot.per=.5,colors="red"))
+```
+Having words like noisy, bad, dirty, block, hard stops come up in bad reviews! people want to have a nice, quiet, clean place to stay!
+
+
+##### Dissimilar words Word Cloud
+
+```{r}
+comparison.cloud(ab_tm, colors = c("blue", "red"),
+                 scale=c(3.6,.5), random.order = FALSE, rot.per=.5, title.size= 1,
+                 max.words = 100)
+```
+
+
+# 7. How does the distribution of AirBNB locations look throughout NYC?
+
+```{r, message = FALSE, warning = FALSE}
+
+
+library(readxl)
+library(ggplot2)
+library(ggthemes)
+library(dplyr)
+library(maps)
+library(tidyverse)
+library(tmap)
+library(ggmap)
+library(hablar)
+library(maps)
+library(tidyverse)
+library(ggmap)
+library(rgdal)
+library(data.table)
+library(devtools)
+library(leaflet)
+library(geojsonio)
+library(readr)
+library(RgoogleMaps)
+
+
+
+reviews <- read_csv("/Users/armaanahmed/Desktop/untitled\ folder\ 2/reviews.csv")
+calendar <- read_csv("/Users/armaanahmed/Desktop/untitled\ folder\ 2/calendar.csv")
+listings <- read_csv("/Users/armaanahmed/Desktop/untitled\ folder\ 2/listings.csv")
+
+airbnb <- read_csv("/Users/armaanahmed/Documents/GitHub/Group_O_Airbnb/AB_US_2020.csv")
+airbnb<-subset(airbnb, city == "New York City")
+
+
+##Get rid of unnecessary data in park dataset
+
+
+##Create base layer map
+map_TS_st1 <- get_map("New York City", zoom=12, 
+                      source="stamen",maptype="toner-background")
+ggmap_TS_st1 <- ggmap(map_TS_st1) 
+ggmap_TS_st1
+
+map2<-ggmap_TS_st1 + geom_point(aes(x=longitude,y=latitude),data=airbnb, 
+                    size=1, alpha=0.9, color="blue")
+map2
+
+
+airbnbdt <- as.data.table(airbnb)
+
+##let's stagger the prices ranges
+airbnb$pricerange[airbnb$price > 400] <- "Ultra-expensive?"
+airbnb$pricerange[airbnb$price < 400] <- "Expensive"
+airbnb$pricerange[airbnb$price < 300] <- "Kinda Pricey"
+airbnb$pricerange[airbnb$price < 200] <- "A steal"
+airbnb$pricerange[airbnb$price < 100] <- "$99 Bargain"
+
+##do some color work/differentiate price by color
+library(RColorBrewer)
+pal = colorFactor("Set1", domain = airbnb$pricerange) # Grab a palette
+color_offsel1 = pal(airbnb$pricerange)
+
+##popup content
+content <- paste("Check this AirBNB out!!", "<br/>",
+                 "Price:",airbnb$price,"<br/>",
+                 "Number of Reviews:",airbnb$number_of_reviews,"<br/>",
+                 "Type of Room:",airbnb$room_type,"<br/>")
+
+interactiveairbnbmap <- leaflet(airbnb, options = leafletOptions(minZoom = 12, maxZoom = 18)) %>%  # Create a map widget
+  addTiles() %>%    
+  addCircles(lat=~latitude, lng=~longitude,color = color_offsel1, popup = content) %>%
+    addProviderTiles("NASAGIBS.ViirsEarthAtNight2012") %>%setView( lng = -73.96, lat = 40.78, zoom = 14 )
+interactiveairbnbmap
+
+
+
+clusteredmap <- leaflet(airbnb, options = leafletOptions()) %>%  # Create a map widget
+  addTiles() %>%    # Add default OpenStreetMap map tiles
+  addCircleMarkers(lat=~latitude, lng=~longitude,color = color_offsel1, popup = content,  clusterOptions = markerClusterOptions()) %>%
+  setView( lng = -73.96, lat = 40.78, zoom = 14 ) %>% addLegend(pal = pal, values = airbnb$pricerange, title = "AirBNB's in New York City <br/> Check it out!") %>% addProviderTiles("NASAGIBS.ViirsEarthAtNight2012")
+clusteredmap
+
+##It looks like a majority of AirBNBs are densely concentrated in either Manhattan or Long Island City, which less and less more scattered out throughout the Bronx, Staten Island and Queens.
+
+```
+
+```{r, message = FALSE, warning = FALSE}
+##Create a table that has the mean Fine by police precinct
+averagefines <- airbnb %>%
+    group_by(price) %>%
+    dplyr::summarize(Mean = mean(price, na.rm=TRUE))
+
+##innerjoin neighborhood from listings to airbnb
+
+##Get rid of unnecessary data in listings dataset
+smalllistings <- listings %>% select(neighbourhood_cleansed, id)
+
+airbnb <- left_join(airbnb, 
+                      smalllistings, 
+                       by=c("id"))
+
+##Save it as a dataframe
+##as.data.frame.matrix(averagefines) 
+averagefines <- data.frame(averagefines)
+
+
+
+```
+
+
+
+
+
+
+```
+
+```{r}
+#okay, lets bring covid into this
+##mergeddata$covidfines <- ave(mergeddata$Fine, mergeddata$day, FUN=cumsum)
+airbnbprice <- aggregate(airbnb$price, by=list(Category=airbnb$neighbourhood_cleansed), FUN=mean)
+airbnbprice <- rename(airbnbprice, Neighborhood = Category)
+airbnbprice <- rename(airbnbprice, Price = x)
+airbnbprice <- subset(airbnbprice, Neighborhood != "Fort Wadsworth")
+
+
+library(plotly)
+s8 <- ggplot(airbnbprice,aes(x = Neighborhood, y = Price)) + geom_point(aes(color = Neighborhood, fill = Price)) + ggtitle("Average Price by Neighborhood") + ylab("Average Price") + xlab("Neighborhood") + theme_bw()  +theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())+ theme(legend.position = "none") + theme(plot.title = element_text(hjust = 0.5))
+
+int <- plotly_build(s8) 
+int
+
+
+```
+
+# 8. How do prices vary by borough/neighborhood for AirBNBs?
+
+```{r}
+pricebyneighborhoodplot <- plot_ly(airbnbprice, x = ~Neighborhood, y = ~Price, type = 'scatter', mode = 'markers', marker = list(size = ~Price/10, opacity = 0.5, color = ~Price, colors = 'Paired'))
+pricebyneighborhoodplot <- pricebyneighborhoodplot %>% layout(title = 'Average Price by Neighborhood in NYC',
+         xaxis = list(showgrid = FALSE, showticklabels=FALSE, visible = FALSE),
+         yaxis = list(showgrid = FALSE))
+
+pricebyneighborhoodplot
+
+##add borough information
+##hand coded this information from wikipedia info on different boroughs and the neighborhoods they contain
+neighborhoodborough <- read_csv("/Users/armaanahmed/Documents/GitHub/Group_O_Airbnb/neighborhoodbyborough.csv")
+neighborhoodborough <- neighborhoodborough %>%
+  select(Neighborhood, Borough)
+
+#join the borough and airbnb data
+airbnbprice <- left_join(airbnbprice, 
+                      neighborhoodborough, 
+                       by=c("Neighborhood"))
+
+##list of neighborhoods that have to be manually added Battery Park City, Bedford Stuyvesant, Belmont, Bergen Beach, Brighton Beach, Bull's Head, Claremont Village, Columbia St, Concourse, Concourse Village, Ditmars Steinway, East Harlem, East Morrisania, Fieldston, Flatiron District, Fordham, Gramercy, Highbridge, Howland Hook, Hunts Point, Kingsbridge, Longwood, Melrose, Morris Heights, Morrisania, Mott Haven, Mount Eden, Mount Hope, Navy Yard, New Dorp Beach, Nolita, North Riverdale, Norwood, Port Morris, Prospect-Lefferts Gardens, Riverdale, Roosevelt Island, South Slope, Spuyten Duyvil, St. Albans, St. George, Stuyvesant Town, Throgs Neck, Tremont, Tribeca, University Heights, West Farms, Windsor Terrace, Woodlawn
+
+
+##check with rows are still NA
+NAROWSDF <- airbnbprice[rowSums(is.na(airbnbprice)) > 0,]
+NAROWSDF
+
+#add their correct borough
+airbnbprice$Borough[airbnbprice$Neighborhood=='Battery Park City'] <- 'Manhattan'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Bedford-Stuyvesant'] <- 'Brooklyn'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Belmont'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Bergen Beach'] <- 'Brooklyn'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Brighton Beach'] <- 'Brooklyn'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Bull\`s Head'] <- 'Staten Island'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Claremont Village'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Columbia St'] <- 'Brooklyn'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Concourse'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Concourse Village'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Ditmars Steinway'] <- 'Brooklyn'
+airbnbprice$Borough[airbnbprice$Neighborhood=='East Harlem'] <- 'Manhattan'
+airbnbprice$Borough[airbnbprice$Neighborhood=='East Morrisania'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Fieldston'] <- 'Manhattan'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Flatiron District'] <- 'Manhattan'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Fordham'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Gramercy'] <- 'Manhattan'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Highbridge'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Howland Hook'] <- 'Staten Island'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Hunts Point'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Kingsbridge'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Longwood'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Melrose'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Morris Heights'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Morrisania'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Mott Haven'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Mount Eden'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Mount Hope'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Navy Yard'] <- 'Brooklyn'
+airbnbprice$Borough[airbnbprice$Neighborhood=='New Dorp Beach'] <- 'Staten Island'
+airbnbprice$Borough[airbnbprice$Neighborhood=='North Riverdale'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Norwood'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Port Morris'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Prospect-Lefferts Gardens'] <- 'Brooklyn'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Riverdale'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Roosevelt Island'] <- 'Manhattan'
+airbnbprice$Borough[airbnbprice$Neighborhood=='South Slope'] <- 'Brooklyn'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Spuyten Duyvil'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='St. Albans'] <- 'Queens'
+airbnbprice$Borough[airbnbprice$Neighborhood=='St. George'] <- 'Staten Island'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Stuyvesant Town'] <- 'Manhattan'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Throgs Neck'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Tremont'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Tribeca'] <- 'Manhattan'
+airbnbprice$Borough[airbnbprice$Neighborhood=='University Heights'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='West Farms'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Windsor Terrace'] <- 'Brooklyn'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Woodlawn'] <- 'Bronx'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Nolita'] <- 'Manhattan'
+airbnbprice$Borough[airbnbprice$Neighborhood=='Sheepshead Bay'] <- 'Brooklyn'
+
+##sort it alphabetically so each borough gets their own space
+airbnbprice <- airbnbprice[order(airbnbprice$Borough),]
+str(airbnbprice)
+
+##let's add some color
+airbnbprice$Color[airbnbprice$Borough=='Manhattan'] <- 'darksalmon'
+airbnbprice$Color[airbnbprice$Borough=='Queens'] <- 'aquamarine'
+airbnbprice$Color[airbnbprice$Borough=='Bronx'] <- 'yellow'
+airbnbprice$Color[airbnbprice$Borough=='Brooklyn'] <- 'violet'
+airbnbprice$Color[airbnbprice$Borough=='Staten Island'] <- 'lavender'
+
+##lets plot it again by borough
+pricebyneighborhoodplot <- plot_ly(airbnbprice, x = ~Neighborhood, y = ~Price, type = 'scatter', mode = 'markers', text = paste("<br>Neighborhood: ", airbnbprice$Neighborhood, "<br>Borough: ", airbnbprice$Borough,"<br>Average Price: ", airbnbprice$Price, hoverinfo = ''), marker = list(size = ~Price/10, opacity = 0.5, color = ~Color, fill = ~Borough, colors = 'Paired'))
+pricebyneighborhoodplot <- pricebyneighborhoodplot %>% layout(title = 'Average AirBNB Price by Neighborhood in NYC',
+         xaxis = list(showgrid = FALSE, showticklabels=FALSE, visible = FALSE),
+         yaxis = list(showgrid = FALSE))
+
+pricebyneighborhoodplot
+##It looks like manhattan takes the cake when it comes to having the most expensive median airbnb rates, with staten island coming suprisingly close. Queen, the Bronx, and Brooklyn all have generally lower average rates. 
+
+```
+
+For our chloropleth maps, they are attached seperately because the html files were too large.
+AirBNB in 2019 had more rooms and vacancies throughout NYC, while in 2020 we saw that the number of rooms and vacancies decreased due to COVID-19.
+plotly_num_airbnb19.html
+plotly_num_airbnb20.html
+also in our GITHUB! 
+
+Thanks for a great semester!!
