@@ -1,5 +1,8 @@
-# Group_O_Airbnb
+# Group_O
 > This is the public repository for Group O.  
+
+# TOPIC
+> Airbnb New York City.
 
 ## Group Member
 - Armaan Ahmed (asa2249@columbia.edu)
@@ -10,3 +13,6 @@
 
 ### Data Source:
 >http://insideairbnb.com/get-the-data.html
+
+###
+Skills: ggplot2, Geospatial, Plotly, ggmap, WordCloud, and some other visualization functions in R.
