@@ -13,6 +13,9 @@
 ### Group Presentation Video
 >https://drive.google.com/file/d/1A5ojnlKYo1tzIuSlcMzM7TNo7O8y6Fr8/view?usp=sharing.
 
+## Group Final Project
+- Group-O-Final-Project.html
+- Group O Final Project.Rmr
 
 ### Data Source:
 >http://insideairbnb.com/get-the-data.html
