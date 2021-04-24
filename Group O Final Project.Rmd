@@ -5,13 +5,14 @@ date: "4/19/2021"
 output: html_document
 ---
 
+#While we initially showed code sporadically, we took advice from the comments given by our classmates, and decided to make all code invisible, which made our final presentation more presentable and polished. 
 
 ```{r setup, include=FALSE, message = FALSE, warning = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE,message = FALSE, warning = FALSE}
 library(tidyverse)
 library(lubridate)
 library(stringr)
@@ -20,11 +21,11 @@ source('https://raw.githubusercontent.com/iascchen/VisHealth/master/R/calendarHe
 
 # 1. Visualising AirBnB Occupancies and Revenue Generated Over Time
 
-Calendar heatmaps are often used to discern patterns, trends, and anomalies over time in a calendar-like interface. In this case, they can be used to understand how AirBnB occupancies and revenue generated over change over the period of 2019 to 2020.
+For the initial data exploration part of our project, we used calendar heatmaps, which are often used to discern patterns, trends, and anomalies over time in a calendar-like interface. In this case, they can be used to understand how AirBnB occupancies and revenue generated over change over the period of 2019 to 2020.
 
-```{r, echo=FALSE}
-first2019 <- read.csv('/Users/armaanahmed/Desktop/Data\ Viz\ AirBNB\ Data/Lavanya/first2019.csv')
-second2019 <- read.csv('/Users/armaanahmed/Desktop/Data\ Viz\ AirBNB\ Data/Lavanya/second2019.csv')
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+first2019 <- read.csv('/Users/armaanahmed/Desktop/Classes/Data\ Visualization/Data\ Viz\ AirBNB\ Data/Lavanya/first2019.csv')
+second2019 <- read.csv('/Users/armaanahmed/Desktop/Classes/Data\ Visualization/Data\ Viz\ AirBNB\ Data/Lavanya/second2019.csv')
 combined2019 <- rbind(first2019, second2019)
 combined2019 <- combined2019 %>% mutate(booked = ifelse(available == 'f', 1, 0))
 combined2019$price <- as.integer(str_replace(combined2019$price, '.', ''))
@@ -38,9 +39,9 @@ revenue_2019 <- combined2019 %>% filter(booked == 1) %>% group_by(date = date) %
             avgRevenue = mean(price, na.rm = TRUE))
 ```
 
-```{r, echo=FALSE}
-first2020 <- read.csv('/Users/armaanahmed/Desktop/Data\ Viz\ AirBNB\ Data/Lavanya/first2020.csv')
-second2020 <- read.csv('/Users/armaanahmed/Desktop/Data\ Viz\ AirBNB\ Data/Lavanya/second2020.csv')
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+first2020 <- read.csv('/Users/armaanahmed/Desktop/Classes/Data\ Visualization/Data\ Viz\ AirBNB\ Data/Lavanya/first2020.csv')
+second2020 <- read.csv('/Users/armaanahmed/Desktop/Classes/Data\ Visualization/Data\ Viz\ AirBNB\ Data/Lavanya/second2020.csv')
 combined2020 <- rbind(first2020, second2020)
 combined2020 <- combined2020 %>% mutate(booked = ifelse(available == 'f', 1, 0))
 combined2020$price <- as.integer(str_replace(combined2020$price, '.', ''))
@@ -58,11 +59,11 @@ revenue_2020 <- combined2020 %>% filter(booked == 1) %>% group_by(date = date) %
 
 We can see that total occupancies in 2019 were generally at least twice that of occupancies in 2020.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 combined_occupancy <- rbind(occupancy_2019, occupancy_2020)
 ```
 
-```{r,echo=FALSE}
+```{r,echo=FALSE, message = FALSE, warning = FALSE}
 calendarHeat(combined_occupancy$date, combined_occupancy$totalBooked, 
              ncolors = 99, color = 'g2r', varname = 'Total Occupancies in New York City')
 ```
@@ -71,7 +72,7 @@ calendarHeat(combined_occupancy$date, combined_occupancy$totalBooked,
 
 Occupancy rates are severely reduced in 2020.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 calendarHeat(combined_occupancy$date, combined_occupancy$percent_booked, 
              ncolors = 99, color = 'g2r', varname = 'Occupancy Rates in New York City')
 ```
@@ -80,11 +81,11 @@ calendarHeat(combined_occupancy$date, combined_occupancy$percent_booked,
 
 Total daily revenue decreased from about 6 million dollars a day to 2 or 3 million dollars a day.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 combined_revenue <- rbind(revenue_2019, revenue_2020)
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 calendarHeat(combined_revenue$date, combined_revenue$totalRevenue, 
              ncolors = 99, color = 'r2b', varname = 'Total Daily Revenue in New York City')
 ```
@@ -93,7 +94,7 @@ calendarHeat(combined_revenue$date, combined_revenue$totalRevenue,
 
 Average daily revenues are also lower in 2020.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 calendarHeat(combined_revenue$date, combined_revenue$avgRevenue, 
              ncolors = 99, color = 'r2b', varname = 'Average Daily Revenues in New York City')
 ```
@@ -102,7 +103,7 @@ calendarHeat(combined_revenue$date, combined_revenue$avgRevenue,
 
 We can view the same patterns using line graphs instead.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 ggplot(data = combined_occupancy, aes(x = as.Date(date), y = totalBooked)) +
   geom_point(color = '#007A87', alpha = 0.5) +
   geom_smooth(color = '#FF5A5F') +
@@ -114,7 +115,7 @@ ggplot(data = combined_occupancy, aes(x = as.Date(date), y = totalBooked)) +
         axis.title.x = element_blank())
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 ggplot(data = combined_occupancy, aes(x = as.Date(date), y = percent_booked)) +
   geom_point(color = '#007A87', alpha = 0.5) +
   geom_smooth(color = '#FF5A5F') +
@@ -126,7 +127,7 @@ ggplot(data = combined_occupancy, aes(x = as.Date(date), y = percent_booked)) +
         axis.title.x = element_blank())
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 ggplot(data = combined_revenue, aes(x = as.Date(date), y = totalRevenue)) +
   geom_point(color = '#007A87', alpha = 0.5) +
   geom_smooth(color = '#FF5A5F') +
@@ -138,7 +139,7 @@ ggplot(data = combined_revenue, aes(x = as.Date(date), y = totalRevenue)) +
         axis.title.x = element_blank())
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 ggplot(data = combined_occupancy, aes(x = as.Date(date), y = totalBooked)) +
   geom_point(color = '#007A87', alpha = 0.5) +
   geom_smooth(color = '#FF5A5F') +
@@ -154,16 +155,16 @@ ggplot(data = combined_occupancy, aes(x = as.Date(date), y = totalBooked)) +
 
 The data tables allow users to see the number of bookings, listings, percentage of listings booked, total revenue, and average revenue for any day that they select.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 library(DT)
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 datatable(combined_occupancy, filter = 'top', options = list(searchHighlight = TRUE)) %>%
   formatRound(~percent_booked, digits = 0)
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 datatable(combined_revenue, filter = 'top', options = list(searchHighlight = TRUE)) %>%
   formatRound(~totalRevenue + avgRevenue, digits = 0)
 ```
@@ -172,13 +173,13 @@ datatable(combined_revenue, filter = 'top', options = list(searchHighlight = TRU
 
 The patterns in the reviews are similar to those in the occupancy and revenue trends.
 
-```{r, echo=FALSE}
-reviews <- read.csv('/Users/armaanahmed/Desktop/Data\ Viz\ AirBNB\ Data/Lavanya/reviews.csv')
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+reviews <- read.csv('/Users/armaanahmed/Desktop/Classes/Data\ Visualization/Data\ Viz\ AirBNB\ Data/Lavanya/reviews.csv')
 reviews_summary <- reviews %>% group_by(date) %>% summarise(totalReviews = n())
 reviews_summary$percent_reviews <- reviews_summary$totalReviews/combined_occupancy$totalBooked
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 ggplot(data = reviews_summary, aes(x = as.Date(date), y = totalReviews)) +
   geom_point(color = '#007A87', alpha = 0.5) +
   geom_smooth(color = '#FF5A5F') +
@@ -192,7 +193,7 @@ ggplot(data = reviews_summary, aes(x = as.Date(date), y = totalReviews)) +
 
 On average, we see that only 1.5% of guests leave reviews.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 ggplot(data = reviews_summary, aes(x = as.Date(date), y = percent_reviews)) +
   geom_point(color = '#007A87', alpha = 0.5) +
   geom_smooth(color = '#FF5A5F') +
@@ -208,8 +209,8 @@ ggplot(data = reviews_summary, aes(x = as.Date(date), y = percent_reviews)) +
 
 We were interested to know what makes a host a superhost. We believe that response and acceptance rates could be linked closely to it.
 
-```{r, echo=FALSE}
-listings <- read.csv('/Users/armaanahmed/Desktop/Data\ Viz\ AirBNB\ Data/Lavanya/jan2021_listings.csv')
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+listings <- read.csv('/Users/armaanahmed/Desktop/Classes/Data\ Visualization/Data\ Viz\ AirBNB\ Data/Lavanya/jan2021_listings.csv')
 superhost <- listings %>% select(host_response_time, host_response_rate, host_acceptance_rate, host_has_profile_pic, host_identity_verified, host_is_superhost)
 superhost[superhost == 'N/A'] <- NA
 superhost <- na.omit(superhost)
@@ -229,7 +230,7 @@ ggplot(data = superhost_summary, aes(x = host_is_superhost, y = avgResponse, fil
         axis.title.x = element_blank())
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 ggplot(data = superhost_summary, aes(x = host_is_superhost, y = avgAcceptance, fill = host_is_superhost)) +
   geom_col(width = 0.5) +
   labs(title = 'Average Acceptance Rates of Superhosts and Non-Superhosts') +
@@ -239,8 +240,10 @@ ggplot(data = superhost_summary, aes(x = host_is_superhost, y = avgAcceptance, f
         axis.title.x = element_blank())
 ```
 
+
 # 6. Let's do some text analysis!!
 
+Here we cleaned and preprocessed text data collected from AirBNB reviews. We then performed a sentiment analysis, and created word clouds to better understand which words come up more often in positive and negative reviews. 
 
 ```{r, warning = FALSE}
 library(tidyverse)
@@ -250,8 +253,8 @@ library(tidyverse)
 ##/Users/armaanahmed/Desktop/calendar.csv 
 ##install.packages("textdata")
 
-reviews <- read.csv("/Users/armaanahmed/Desktop/Data\ Viz\ AirBNB\ Data/Su/data2/reviews.csv")
-listings <- read.csv("/Users/armaanahmed/Desktop/Data\ Viz\ AirBNB\ Data/Su/data2/listings.csv")
+reviews <- read.csv("/Users/armaanahmed/Desktop/Classes/Data\ Visualization/Data\ Viz\ AirBNB\ Data/Su/data2/reviews.csv")
+listings <- read.csv("/Users/armaanahmed/Desktop/Classes/Data\ Visualization/Data\ Viz\ AirBNB\ Data/Su/data2/listings.csv")
 airbnb <- inner_join(listings, reviews, by=c("id" = "listing_id"))
 
 ## filter 2019-2020 data
@@ -340,7 +343,7 @@ table(tidy_ab_sent$sentiment_fac)
 
 
 
-```{r}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 ## divide review sentiments into two groups: good and bad
 tidy_ab_sent$sentiment <- ifelse(tidy_ab_sent$value > 0, "good", "bad")
 
@@ -368,7 +371,7 @@ ab_tm <- t(ab_m)
 
 What are the key words that are found in good comments?
 
-```{r}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 library(wordcloud)
 
 ## success
@@ -382,7 +385,7 @@ Words like Clean, nice, recommend all come up! It seems like cleanliness, aesthe
 
 What are the key words that are found in bad comments?
 
-```{r}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 
 ## success
 filter(tidy_ab_combined, sentiment=="bad") %>%
@@ -394,7 +397,7 @@ Having words like noisy, bad, dirty, block, hard stops come up in bad reviews! p
 
 ##### Dissimilar words Word Cloud
 
-```{r}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 comparison.cloud(ab_tm, colors = c("blue", "red"),
                  scale=c(3.6,.5), random.order = FALSE, rot.per=.5, title.size= 1,
                  max.words = 100)
@@ -403,7 +406,7 @@ comparison.cloud(ab_tm, colors = c("blue", "red"),
 
 # 7. How does the distribution of AirBNB locations look throughout NYC?
 
-```{r, message = FALSE, warning = FALSE}
+```{r, echo=FALSE,message = FALSE, warning = FALSE}
 
 
 library(readxl)
@@ -427,10 +430,9 @@ library(readr)
 library(RgoogleMaps)
 
 
-
-reviews <- read_csv("/Users/armaanahmed/Desktop/untitled\ folder\ 2/reviews.csv")
-calendar <- read_csv("/Users/armaanahmed/Desktop/untitled\ folder\ 2/calendar.csv")
-listings <- read_csv("/Users/armaanahmed/Desktop/untitled\ folder\ 2/listings.csv")
+reviews <- read_csv("/Users/armaanahmed/Desktop/Classes/Data\ Visualization/Data\ Visualization\ Final\ Project/untitled\ folder\ 2/reviews.csv")
+calendar <- read_csv("/Users/armaanahmed/Desktop/Classes/Data\ Visualization/Data\ Visualization\ Final\ Project/untitled\ folder\ 2/calendar.csv")
+listings <- read_csv("/Users/armaanahmed/Desktop/Classes/Data\ Visualization/Data\ Visualization\ Final\ Project/untitled\ folder\ 2/listings.csv")
 
 airbnb <- read_csv("/Users/armaanahmed/Documents/GitHub/Group_O_Airbnb/AB_US_2020.csv")
 airbnb<-subset(airbnb, city == "New York City")
@@ -443,11 +445,13 @@ airbnb<-subset(airbnb, city == "New York City")
 map_TS_st1 <- get_map("New York City", zoom=12, 
                       source="stamen",maptype="toner-background")
 ggmap_TS_st1 <- ggmap(map_TS_st1) 
-ggmap_TS_st1
+##ggmap_TS_st1
 
 map2<-ggmap_TS_st1 + geom_point(aes(x=longitude,y=latitude),data=airbnb, 
                     size=1, alpha=0.9, color="blue")
 map2
+
+##A sample of what a map with no interactivy would look like
 
 
 airbnbdt <- as.data.table(airbnb)
@@ -473,7 +477,7 @@ content <- paste("Check this AirBNB out!!", "<br/>",
 interactiveairbnbmap <- leaflet(airbnb, options = leafletOptions(minZoom = 12, maxZoom = 18)) %>%  # Create a map widget
   addTiles() %>%    
   addCircles(lat=~latitude, lng=~longitude,color = color_offsel1, popup = content) %>%
-    addProviderTiles("NASAGIBS.ViirsEarthAtNight2012") %>%setView( lng = -73.96, lat = 40.78, zoom = 14 )
+    addProviderTiles("NASAGIBS.ViirsEarthAtNight2012") %>%setView( lng = -73.96, lat = 40.78, zoom = 14 ) %>% addLegend(pal = pal, values = airbnb$pricerange, title = "AirBNB's in New York City <br/> Check it out!")
 interactiveairbnbmap
 
 
@@ -488,7 +492,7 @@ clusteredmap
 
 ```
 
-```{r, message = FALSE, warning = FALSE}
+```{r, echo=FALSE,message = FALSE, warning = FALSE}
 ##Create a table that has the mean Fine by police precinct
 averagefines <- airbnb %>%
     group_by(price) %>%
@@ -518,9 +522,8 @@ averagefines <- data.frame(averagefines)
 
 ```
 
-```{r}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 #okay, lets bring covid into this
-##mergeddata$covidfines <- ave(mergeddata$Fine, mergeddata$day, FUN=cumsum)
 airbnbprice <- aggregate(airbnb$price, by=list(Category=airbnb$neighbourhood_cleansed), FUN=mean)
 airbnbprice <- rename(airbnbprice, Neighborhood = Category)
 airbnbprice <- rename(airbnbprice, Price = x)
@@ -537,8 +540,9 @@ int
 ```
 
 # 8. How do prices vary by borough/neighborhood for AirBNBs?
+### We decided to use this as our last plot, because it was the easiest for actual consumers/users to engage with
 
-```{r}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 pricebyneighborhoodplot <- plot_ly(airbnbprice, x = ~Neighborhood, y = ~Price, type = 'scatter', mode = 'markers', marker = list(size = ~Price/10, opacity = 0.5, color = ~Price, colors = 'Paired'))
 pricebyneighborhoodplot <- pricebyneighborhoodplot %>% layout(title = 'Average Price by Neighborhood in NYC',
          xaxis = list(showgrid = FALSE, showticklabels=FALSE, visible = FALSE),
@@ -562,7 +566,7 @@ airbnbprice <- left_join(airbnbprice,
 
 ##check with rows are still NA
 NAROWSDF <- airbnbprice[rowSums(is.na(airbnbprice)) > 0,]
-NAROWSDF
+#NAROWSDF
 
 #add their correct borough
 airbnbprice$Borough[airbnbprice$Neighborhood=='Battery Park City'] <- 'Manhattan'
@@ -618,7 +622,7 @@ airbnbprice$Borough[airbnbprice$Neighborhood=='Sheepshead Bay'] <- 'Brooklyn'
 
 ##sort it alphabetically so each borough gets their own space
 airbnbprice <- airbnbprice[order(airbnbprice$Borough),]
-str(airbnbprice)
+#str(airbnbprice)
 
 ##let's add some color
 airbnbprice$Color[airbnbprice$Borough=='Manhattan'] <- 'darksalmon'
@@ -628,10 +632,11 @@ airbnbprice$Color[airbnbprice$Borough=='Brooklyn'] <- 'violet'
 airbnbprice$Color[airbnbprice$Borough=='Staten Island'] <- 'lavender'
 
 ##lets plot it again by borough
-pricebyneighborhoodplot <- plot_ly(airbnbprice, x = ~Neighborhood, y = ~Price, type = 'scatter', mode = 'markers', text = paste("<br>Neighborhood: ", airbnbprice$Neighborhood, "<br>Borough: ", airbnbprice$Borough,"<br>Average Price: ", airbnbprice$Price, hoverinfo = ''), marker = list(size = ~Price/10, opacity = 0.5, color = ~Color, fill = ~Borough, colors = 'Paired'))
+pricebyneighborhoodplot <- plot_ly(airbnbprice, x = ~Neighborhood, y = ~Price, hover_name="AirBNB", type = 'scatter', mode = 'markers', text = paste("<br>Neighborhood: ", airbnbprice$Neighborhood, "<br>Borough: ", airbnbprice$Borough,"<br>Average Price: ", airbnbprice$Price, hoverinfo = ''), marker = list(size = ~Price/10, opacity = 0.5, color = ~Color, fill = ~Borough, colors = 'Paired', labels={~Borough}))
 pricebyneighborhoodplot <- pricebyneighborhoodplot %>% layout(title = 'Average AirBNB Price by Neighborhood in NYC',
          xaxis = list(showgrid = FALSE, showticklabels=FALSE, visible = FALSE),
          yaxis = list(showgrid = FALSE))
+##I was unable to add a legend to this plot, but I would have added one that was colored by neighborhood (ie darksalmon for Manhattan, Aquamarine for Queens).
 
 pricebyneighborhoodplot
 ##It looks like manhattan takes the cake when it comes to having the most expensive median airbnb rates, with staten island coming suprisingly close. Queen, the Bronx, and Brooklyn all have generally lower average rates. 
